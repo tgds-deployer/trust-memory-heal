@@ -1,3 +1,5 @@
+// ⚠️ Runtime fallback and trust layer © 2025 DevExcelsior — Licensed via BUSL 1.1
+// Integration includes agent fallback orchestration and healing session memory tracking.
 import { sentryHandleError } from '~/lib/sentry';
 
 /**
