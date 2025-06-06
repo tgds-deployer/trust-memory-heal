@@ -1,4 +1,4 @@
--- Create chat table
+-- Create chats table
 CREATE TABLE IF NOT EXISTS public.chats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -19,15 +19,19 @@ CREATE TRIGGER update_chats_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
--- Enable Row Level Security
+-- Enable Row-Level Security (RLS)
 ALTER TABLE public.chats ENABLE ROW LEVEL SECURITY;
 
--- Allow public read access to chats for admins
+-- === RLS Policies for chats ===
+
+-- Allow admin read access to all chats
 CREATE POLICY "Allow admin read access to all chats"
   ON public.chats FOR SELECT
   TO public
   USING (
-    auth.uid() IN (SELECT id FROM public.profiles WHERE is_admin = true)
+    auth.uid() IN (
+      SELECT id FROM public.profiles WHERE is_admin = true
+    )
   );
 
 -- Allow users to read their own chats
@@ -36,7 +40,7 @@ CREATE POLICY "Allow users to read their own chats"
   TO public
   USING (auth.uid() = user_id);
 
--- Allow anyone to create chats (including anonymous users)
+-- Allow anyone to create chats (even unauthenticated users)
 CREATE POLICY "Allow anyone to create chats"
   ON public.chats FOR INSERT
   TO public
@@ -47,7 +51,9 @@ CREATE POLICY "Allow admins to update any chats"
   ON public.chats FOR UPDATE
   TO public
   USING (
-    auth.uid() IN (SELECT id FROM public.profiles WHERE is_admin = true)
+    auth.uid() IN (
+      SELECT id FROM public.profiles WHERE is_admin = true
+    )
   );
 
 -- Allow users to update their own chats

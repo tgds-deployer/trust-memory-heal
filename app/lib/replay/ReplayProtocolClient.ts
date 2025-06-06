@@ -1,5 +1,6 @@
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
 import { createInjectableFunction } from './injectable';
+import { safeJsonParse } from '../utils/safeJson';
 
 const replayWsServer = 'wss://dispatch.replay.io';
 
@@ -171,7 +172,7 @@ export class ProtocolClient {
   };
 
   onSocketMessage = (event: MessageEvent) => {
-    const { error, id, method, params, result } = JSON.parse(String(event.data));
+    const { error, id, method, params, result } = safeJsonParse(String(event.data));
 
     if (id) {
       const info = this.pendingCommands.get(id);

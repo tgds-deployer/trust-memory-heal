@@ -24,19 +24,22 @@ BEGIN
             NULL,
             FALSE
         );
-        
+
         RAISE NOTICE 'Created profile for user %', user_record.email;
     END LOOP;
 END;
-$$ LANGUAGE plpgsql
+$$ LANGUAGE plpgsql;
+
 -- Output the number of profiles created
-SELECT 'Profiles created for existing users: ' || COUNT(*)::text as result
+SELECT 
+  'Profiles created for existing users: ' || COUNT(*)::text AS result
 FROM (
     SELECT au.id
     FROM auth.users au
     LEFT JOIN public.profiles p ON p.id = au.id
     WHERE p.id IS NULL
-) as missing_profiles
+) AS missing_profiles;
+
 -- List all profiles
 SELECT 
     p.id,
@@ -44,4 +47,4 @@ SELECT
     p.is_admin,
     p.created_at
 FROM public.profiles p
-ORDER BY p.created_at DESC
+ORDER BY p.created_at DESC;

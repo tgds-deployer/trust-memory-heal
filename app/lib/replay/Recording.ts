@@ -5,6 +5,7 @@
 //
 // Note that to make this easier we don't use backticks ` in this file.
 
+import { safeJsonParse } from '../utils/safeJson';
 import { createInjectableFunction } from './injectable';
 import { assert, stringToBase64, uint8ArrayToBase64 } from './ReplayProtocolClient';
 import type {
@@ -74,7 +75,7 @@ export async function getIFrameSimulationData(iframe: HTMLIFrameElement): Promis
   const decoder = new TextDecoder();
   const jsonString = decoder.decode(new Uint8Array(buffer));
 
-  return JSON.parse(jsonString) as SimulationData;
+  return safeJsonParse(jsonString) as SimulationData;
 }
 
 export interface MouseData {

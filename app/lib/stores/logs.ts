@@ -1,6 +1,7 @@
 import { atom, map } from 'nanostores';
 import Cookies from 'js-cookie';
 import { createScopedLogger } from '~/utils/logger';
+import { safeJsonParse } from '../utils/safeJson';
 
 const logger = createScopedLogger('LogStore');
 
@@ -29,7 +30,7 @@ class LogStore {
 
     if (savedLogs) {
       try {
-        const parsedLogs = JSON.parse(savedLogs);
+        const parsedLogs = safeJsonParse(savedLogs);
         this._logs.set(parsedLogs);
       } catch (error) {
         logger.error('Failed to parse logs from cookies:', error);
@@ -103,9 +104,9 @@ class LogStore {
       error:
         error instanceof Error
           ? {
-              message: error.message,
-              stack: error.stack,
-            }
+            message: error.message,
+            stack: error.stack,
+          }
           : error,
     };
     return this.addLog(message, 'error', 'error', errorDetails);

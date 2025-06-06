@@ -2,6 +2,7 @@
 
 import { generateId } from '~/utils/fileUtils';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
+import { safeJsonParse } from '../utils/safeJson';
 
 type MessageRole = 'user' | 'assistant';
 
@@ -136,7 +137,7 @@ export interface AppDescription {
 export function parseDescribeAppMessage(message: Message): AppDescription | undefined {
   try {
     assert(message.type === 'text', 'Message is not a text message');
-    const appDescription = JSON.parse(message.content) as AppDescription;
+    const appDescription = safeJsonParse(message.content) as AppDescription;
     assert(appDescription.description, 'Missing description');
     assert(appDescription.features, 'Missing features');
     return appDescription;
@@ -158,17 +159,25 @@ export interface BestAppFeatureResult {
 
 export function parseSearchArboretumResult(message: Message): BestAppFeatureResult | undefined {
   try {
-    assert(message.type === 'text', 'Message is not a text message');
-    const bestAppFeatureResult = JSON.parse(message.content) as BestAppFeatureResult;
+    if (message.type !== 'text') throw new Error('Message is not a text message');
+    if (message.content === 'NotFound') throw new Error('Message content is NotFound');
+
+    const bestAppFeatureResult = safeJsonParse<BestAppFeatureResult>(message.content);
+    if (!bestAppFeatureResult) throw new Error('Parsed result is undefined');
+
+    // Validate required fields
     assert(bestAppFeatureResult.arboretumRepositoryId, 'Missing arboretum repository id');
     assert(bestAppFeatureResult.arboretumDescription, 'Missing arboretum description');
     assert(bestAppFeatureResult.revisedDescription, 'Missing revised description');
+
     return bestAppFeatureResult;
   } catch (e) {
     console.error('Failed to parse best app feature result message', e);
     return undefined;
   }
 }
+
+
 
 // Message sent when a feature has finished being implemented.
 export const FEATURE_DONE_CATEGORY = 'FeatureDone';
@@ -181,7 +190,7 @@ export interface FeatureDoneResult {
 export function parseFeatureDoneMessage(message: Message): FeatureDoneResult | undefined {
   try {
     assert(message.type === 'text', 'Message is not a text message');
-    const featureDoneResult = JSON.parse(message.content) as FeatureDoneResult;
+    const featureDoneResult = safeJsonParse(message.content) as FeatureDoneResult;
     assert(featureDoneResult.featureDescription, 'Missing feature description');
     return featureDoneResult;
   } catch (e) {

@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid';
 import { getMessagesRepositoryId, type Message } from './message';
 import { assert } from '~/lib/replay/ReplayProtocolClient';
 import type { DeploySettingsDatabase } from '~/lib/replay/Deploy';
+import { safeJsonParse } from '../utils/safeJson';
 
 export interface ChatSummary {
   id: string;
@@ -50,7 +51,7 @@ function getLocalChats(): ChatContents[] {
   if (!chatJSON) {
     return [];
   }
-  return JSON.parse(chatJSON);
+  return safeJsonParse(chatJSON);
 }
 
 function setLocalChats(chats: ChatContents[] | undefined): void {

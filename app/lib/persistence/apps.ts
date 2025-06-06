@@ -3,6 +3,7 @@
 import { getSupabase } from '~/lib/supabase/client';
 import type { Message } from './message';
 import { pingTelemetry } from '~/lib/hooks/pingTelemetry';
+import { safeJsonParse } from '../utils/safeJson';
 
 export interface BuildAppOutcome {
   testsPassed?: boolean;
@@ -28,7 +29,7 @@ export interface BuildAppResult extends BuildAppSummary {
 
 function parseBuildAppOutcome(outcome: string): BuildAppOutcome {
   try {
-    const json = JSON.parse(outcome);
+    const json = safeJsonParse(outcome);
     return {
       testsPassed: !!json.testsPassed,
       hasDatabase: !!json.hasDatabase,
